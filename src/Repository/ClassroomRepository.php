@@ -28,6 +28,21 @@ class ClassroomRepository extends ServiceEntityRepository
         return $this->findBy([], ['id' => 'asc'], $limit, $offset);
     }
 
+    /**
+     * Select one classroom or return null
+     *
+     * @param int $id
+     *
+     * @return Classroom|null
+     */
+    public function getOne(int $id): ?Classroom
+    {
+        /**
+         * @noinspection PhpIncompatibleReturnTypeInspection
+         */
+        return $this->find($id);
+    }
+
     // /**
     //  * @return Classroom[] Returns an array of Classroom objects
     //  */

@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * @noinspection PhpUnused
+ */
+
 namespace App\Controller;
 
 use App\Repository\ClassroomRepository;
@@ -13,12 +17,10 @@ class ClassroomController extends AbstractController
     #[Required]
     public ClassroomRepository $repository;
 
-    #[Route('/classroom')]
+    #[Route('/')]
     public function index(): Response
     {
-        return $this->render('classroom/index.html.twig', [
-            'controller_name' => 'ClassroomController',
-        ]);
+        return $this->redirect($this->getParameter('app.homepage'));
     }
 
     #[Route('/api/classrooms', methods: ['GET'])]
@@ -28,6 +30,15 @@ class ClassroomController extends AbstractController
         $offset = $request->query->get('offset') ?? 0;
 
         $data = $this->repository->getList($limit, $offset);
+        $code = $data ? 200 : 404;
+
+        return $this->response($data)->setStatusCode($code);
+    }
+
+    #[Route('/api/classroom/{id}', methods: ['GET'])]
+    public function getClassroom(int $id): Response
+    {
+        $data = $this->repository->getOne($id);
         $code = $data ? 200 : 404;
 
         return $this->response($data)->setStatusCode($code);
