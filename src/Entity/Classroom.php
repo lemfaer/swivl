@@ -17,7 +17,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity(repositoryClass=ClassroomRepository::class)
  * @ORM\HasLifecycleCallbacks()
  */
-// #[ApiResource]
+#[ApiResource]
 class Classroom
 {
     /**

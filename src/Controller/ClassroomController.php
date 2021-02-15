@@ -59,10 +59,10 @@ class ClassroomController extends AbstractController
      * @ParamConverter("modified", converter="api")
      */
     #[Route('/api/classroom/{id}', defaults: ['id' => null], methods: ['POST', 'PUT'])]
-    public function saveClassroom(?Classroom $current, Classroom $modified): Response
+    public function saveClassroom(?Classroom $current, Classroom $modified, bool $replace = true): Response
     {
         try {
-            $this->repository->save($current, $modified);
+            $this->repository->save($current, $modified, $replace);
             [$success, $message] = [true, 'saved'];
         } catch (ORMException $e) {
             [$success, $message] = [false, $e->getMessage()];
@@ -71,5 +71,17 @@ class ClassroomController extends AbstractController
         return $this
             ->response(compact("success", "message"))
             ->setStatusCode($success ? 200 : 400);
+    }
+
+    /**
+     * Create new or replace a classroom
+     *
+     * @ParamConverter("current", converter="doctrine.orm")
+     * @ParamConverter("modified", converter="api")
+     */
+    #[Route('/api/classroom/{id}', methods: ['PATCH'])]
+    public function patchClassroom(Classroom $current, Classroom $modified): Response
+    {
+        return $this->saveClassroom($current, $modified, false);
     }
 }
