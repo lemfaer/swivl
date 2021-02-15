@@ -1,11 +1,19 @@
 help:    ## Show this help.
 	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'
 
+init:
+	$(MAKE) up
+	$(MAKE) install
+	$(MAKE) migrate
+
 mysql:   ## Run mysql cli from docker container using root.
 	@sudo mysql -h 127.0.0.1 -P 33061 -u root
 
 exec:    ## Run composer using php from docker container.
 	@sudo docker-compose exec php sh
+
+install: ## Run composer install using php from docker container.
+	@sudo docker-compose exec php composer install
 
 migrate: ## Run doctrine migrations using php from docker container.
 	@sudo docker-compose exec php php bin/console doctrine:migrations:migrate

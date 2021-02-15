@@ -1,5 +1,9 @@
 ### Installation
 ```shell
+# requirements: docker, docker-compose, make
+git clone https://github.com/lemfaer/swivl.git
+cd swivl
+sudo make init
 ```
 
 ### Get multiple classrooms
