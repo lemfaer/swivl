@@ -24,3 +24,8 @@ curl -X POST "http://localhost:8000/api/classroom/1" -H 'content-type: applicati
 ```shell
 curl -X PATCH "http://localhost:8000/api/classroom/1" -H 'content-type: application/json' -d '{"active": true}'
 ```
+
+### Delete classroom
+```shell
+curl -X DELETE "http://localhost:8000/api/classroom/1"
+```

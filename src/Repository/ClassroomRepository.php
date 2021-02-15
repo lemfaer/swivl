@@ -80,4 +80,19 @@ class ClassroomRepository extends ServiceEntityRepository
         $em->persist($save);
         $em->flush();
     }
+
+    /**
+     * Delete classroom
+     *
+     * @param Classroom $entity record to delete
+     *
+     * @throws ORMException
+     * @throws OptimisticLockException
+     */
+    public function delete(Classroom $entity): void
+    {
+        $em = $this->getEntityManager();
+        $em->remove($entity);
+        $em->flush();
+    }
 }

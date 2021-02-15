@@ -9,7 +9,6 @@ namespace App\Controller;
 
 use App\Entity\Classroom;
 use App\Repository\ClassroomRepository;
-use App\Service\ApiParamConverter;
 use Doctrine\ORM\ORMException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Component\HttpFoundation\Request;
@@ -56,7 +55,7 @@ class ClassroomController extends AbstractController
      * Create new or replace a classroom
      *
      * @ParamConverter("current", converter="doctrine.orm")
-     * @ParamConverter("modified", converter="api")
+     * @ParamConverter("modified", converter="api.param")
      */
     #[Route('/api/classroom/{id}', defaults: ['id' => null], methods: ['POST', 'PUT'])]
     public function saveClassroom(?Classroom $current, Classroom $modified, bool $replace = true): Response
@@ -77,11 +76,29 @@ class ClassroomController extends AbstractController
      * Create new or replace a classroom
      *
      * @ParamConverter("current", converter="doctrine.orm")
-     * @ParamConverter("modified", converter="api")
+     * @ParamConverter("modified", converter="api.param")
      */
     #[Route('/api/classroom/{id}', methods: ['PATCH'])]
     public function patchClassroom(Classroom $current, Classroom $modified): Response
     {
         return $this->saveClassroom($current, $modified, false);
+    }
+
+    /**
+     * Delete classroom
+     */
+    #[Route('/api/classroom/{id}', methods: ['DELETE'])]
+    public function deleteClassroom(Classroom $entity): Response
+    {
+        try {
+            $this->repository->delete($entity);
+            [$success, $message] = [true, 'deleted'];
+        } catch (ORMException $e) {
+            [$success, $message] = [false, $e->getMessage()];
+        }
+
+        return $this
+            ->response(compact("success", "message"))
+            ->setStatusCode($success ? 200 : 400);
     }
 }

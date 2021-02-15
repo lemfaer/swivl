@@ -33,4 +33,4 @@ services:
 
     App\Service\ApiParamConverter:
         tags:
-            - { name: 'request.param_converter', converter: 'api' }
+            - { name: 'request.param_converter', converter: 'api.param' }
