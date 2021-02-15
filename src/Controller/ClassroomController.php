@@ -2,11 +2,16 @@
 
 /**
  * @noinspection PhpUnused
+ * @noinspection PhpDocSignatureInspection
  */
 
 namespace App\Controller;
 
+use App\Entity\Classroom;
 use App\Repository\ClassroomRepository;
+use App\Service\ApiParamConverter;
+use Doctrine\ORM\ORMException;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -23,6 +28,9 @@ class ClassroomController extends AbstractController
         return $this->redirect($this->getParameter('app.homepage'));
     }
 
+    /**
+     * Get list of classrooms
+     */
     #[Route('/api/classrooms', methods: ['GET'])]
     public function getClassrooms(Request $request): Response
     {
@@ -35,18 +43,33 @@ class ClassroomController extends AbstractController
         return $this->response($data)->setStatusCode($code);
     }
 
+    /**
+     * Get one classroom by id
+     */
     #[Route('/api/classroom/{id}', methods: ['GET'])]
-    public function getClassroom(int $id): Response
+    public function getClassroom(?Classroom $entity): Response
     {
-        $data = $this->repository->getOne($id);
-        $code = $data ? 200 : 404;
-
-        return $this->response($data)->setStatusCode($code);
+        return $this->response($entity)->setStatusCode($entity ? 200 : 404);
     }
 
-    //
-    // public function test(): Response
-    // {
-    //     return $this->res
-    // }
+    /**
+     * Create new or replace a classroom
+     *
+     * @ParamConverter("current", converter="doctrine.orm")
+     * @ParamConverter("modified", converter="api")
+     */
+    #[Route('/api/classroom/{id}', defaults: ['id' => null], methods: ['POST', 'PUT'])]
+    public function saveClassroom(?Classroom $current, Classroom $modified): Response
+    {
+        try {
+            $this->repository->save($current, $modified);
+            [$success, $message] = [true, 'saved'];
+        } catch (ORMException $e) {
+            [$success, $message] = [false, $e->getMessage()];
+        }
+
+        return $this
+            ->response(compact("success", "message"))
+            ->setStatusCode($success ? 200 : 400);
+    }
 }

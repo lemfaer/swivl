@@ -11,48 +11,49 @@ use App\Repository\ClassroomRepository;
 use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
-use JsonSerializable;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=ClassroomRepository::class)
+ * @ORM\HasLifecycleCallbacks()
  */
 // #[ApiResource]
-class Classroom implements JsonSerializable
+class Classroom
 {
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    protected ?int $id;
+    protected ?int $id = null;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
      #[Assert\NotBlank(message: "Please enter class name")]
-    protected ?string $name;
+    protected ?string $name = null;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    protected ?bool $active = false;
+    #[Assert\NotBlank(message: "Please provide status")]
+    protected ?bool $active = null;
 
     /**
      * @ORM\Column(type="datetime")
      */
      #[Assert\NotBlank(message: "Please provide formed date")]
-    protected ?DateTimeInterface $formed_at;
+    protected ?DateTimeInterface $formed_at = null;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    protected ?DateTimeInterface $created_at;
+    protected ?DateTimeInterface $created_at = null;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
      */
-    protected ?DateTimeInterface $updated_at;
+    protected ?DateTimeInterface $updated_at = null;
 
     /**
      * Gets triggered only on insert
@@ -61,7 +62,8 @@ class Classroom implements JsonSerializable
      */
     public function onPrePersist(): void
     {
-        $this->created_at = new DateTime("now");
+        $this->setCreatedAt(new DateTime("now"));
+        $this->onPreSave();
     }
 
     /**
@@ -71,26 +73,26 @@ class Classroom implements JsonSerializable
      */
     public function onPreUpdate(): void
     {
-        $this->updated_at = new DateTime("now");
+        $this->setUpdatedAt(new DateTime("now"));
+        $this->onPreSave();
     }
 
     /**
-     * @inheritDoc
-     * @noinspection PhpArrayShapeAttributeCanBeAddedInspection
+     * Triggered on insert & update
      */
-    public function jsonSerialize()
+    public function onPreSave(): void
     {
-        /**
-         * @noinspection NullPointerExceptionInspection
-         */
-        return [
-            "id" => $this->getId(),
-            "name" => $this->getName(),
-            "active" => $this->getActive(),
-            "formed_at" => $this->getFormedAt()?->format('c'),
-            "created_at" => $this->getCreatedAt()?->format('c'),
-            "updated_at" => $this->getUpdatedAt()?->format('c'),
-        ];
+        if (null === $this->getName()) {
+            $this->setName("");
+        }
+
+        if (null === $this->getActive()) {
+            $this->setActive(false);
+        }
+
+        if (null === $this->getFormedAt()) {
+            $this->setFormedAt(new DateTime("now"));
+        }
     }
 
     public function getId(): ?int
@@ -103,7 +105,7 @@ class Classroom implements JsonSerializable
         return $this->name;
     }
 
-    public function setName(string $name): self
+    public function setName(?string $name): self
     {
         $this->name = $name;
 
@@ -115,7 +117,7 @@ class Classroom implements JsonSerializable
         return $this->active;
     }
 
-    public function setActive(bool $active): self
+    public function setActive(?bool $active): self
     {
         $this->active = $active;
 
@@ -127,7 +129,7 @@ class Classroom implements JsonSerializable
         return $this->formed_at;
     }
 
-    public function setFormedAt(DateTimeInterface $formed_at): self
+    public function setFormedAt(?DateTimeInterface $formed_at): self
     {
         $this->formed_at = $formed_at;
 
